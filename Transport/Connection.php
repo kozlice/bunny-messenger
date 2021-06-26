@@ -186,8 +186,10 @@ class Connection
             throw new InvalidArgumentException(sprintf('The given Bunny DSN "%s" is invalid.', $dsn));
         }
 
-        // TODO: Throw if SSL options are not set.
-        $useTls = 0 === strpos($dsn, 'amqps+bunny://');
+        if (0 === strpos($dsn, 'amqps+bunny://') xor array_key_exists('tls', $options)) {
+            throw new InvalidArgumentException('TLS requires both "amqps+bunny://" protocol and TLS options.');
+        }
+
         $path = isset($components['path']) ? explode('/', trim($components['path'], '/')) : [];
         parse_str($components['query'] ?? '', $query);
 

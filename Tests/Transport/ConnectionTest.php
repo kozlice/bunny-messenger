@@ -132,6 +132,25 @@ class ConnectionTest extends TestCase
         ], $configuration);
     }
 
+    public function invalidTlsConfigDataProvider(): iterable
+    {
+        return [
+            ['amqp+bunny://localhost/%2f/messages', ['tls' => []]],
+            ['amqps+bunny://localhost/%2f/messages', []],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidTlsConfigDataProvider
+     */
+    public function testItThrowsOnInvalidTlsConfig(string $dsn, array $options)
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('TLS requires both "amqps+bunny://" protocol and TLS options.');
+
+        Connection::fromDsn($dsn, $options);
+    }
+
     public function invalidQueueArgumentsDataProvider(): iterable
     {
         $baseDsn = 'amqp+bunny://localhost/%2f/messages';
