@@ -61,28 +61,28 @@ class Connection
         if (array_key_exists('tls', $options)) {
             $configuration['client']['ssl'] = [];
             // See https://www.php.net/manual/en/context.ssl.php
-            $allowed = [
-                'peer_name',
-                'verify_peer',
-                'verify_peer_name',
-                'allow_self_signed',
-                'cafile',
-                'capath',
-                'local_cert',
-                'local_pk',
-                'passphrase',
-                'verify_depth',
-                'ciphers',
-                'capture_peer_cert',
-                'capture_peer_cert_chain',
-                'SNI_enabled',
-                'disable_compression',
-                'peer_fingerprint',
-                'security_level',
+            $rules = [
+                'peer_name' => null,
+                'verify_peer' => FILTER_VALIDATE_BOOLEAN,
+                'verify_peer_name' => FILTER_VALIDATE_BOOLEAN,
+                'allow_self_signed' => FILTER_VALIDATE_BOOLEAN,
+                'cafile' => null,
+                'capath' => null,
+                'local_cert' => null,
+                'local_pk' => null,
+                'passphrase' => null,
+                'verify_depth'  => FILTER_VALIDATE_INT,
+                'ciphers' => null,
+                'capture_peer_cert' => FILTER_VALIDATE_BOOLEAN,
+                'capture_peer_cert_chain' => FILTER_VALIDATE_BOOLEAN,
+                'SNI_enabled' => FILTER_VALIDATE_BOOLEAN,
+                'disable_compression' => FILTER_VALIDATE_BOOLEAN,
+                'peer_fingerprint' => null,
+                'security_level' => FILTER_VALIDATE_INT,
             ];
-            foreach ($allowed as $key) {
+            foreach ($rules as $key => $filter) {
                 if (array_key_exists($key, $options['tls'])) {
-                    $configuration['client']['ssl'][$key] = $options['tls'][$key];
+                    $configuration['client']['ssl'][$key] = $filter ? filter_var($options['tls'][$key], $filter) : $options['tls'][$key];
                 }
             }
         }

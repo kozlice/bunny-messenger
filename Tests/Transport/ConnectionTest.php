@@ -132,6 +132,53 @@ class ConnectionTest extends TestCase
         ], $configuration);
     }
 
+    public function testItBuildsConfigurationWithTls()
+    {
+        $connection = Connection::fromDsn(
+            'amqps+bunny://localhost'.
+            '?tls[verify_peer]=true'.
+            '&tls[verify_peer_name]=true'.
+            '&tls[verify_depth]=1'.
+            '&tls[peer_fingerprint][]=hash_1'.
+            '&tls[peer_fingerprint][]=hash_2'.
+            '&tls[disable_compression]=true',
+            ['tls' => [
+                'peer_name' => 'my_peer_name',
+                'allow_self_signed' => 1,
+                'capath' => '/etc/ssl/certs',
+                'cafile' => 'cert.pem',
+                'local_cert' => 'cert.crt',
+                'local_pk' => 'cert.key',
+                'passphrase' => 'password',
+                'ciphers' => 'my_ciphers',
+                'SNI_enabled' => 0,
+                'security_level' => 1,
+                'capture_peer_cert' => true,
+                'capture_peer_cert_chain' => true,
+            ]]
+        );
+        $configuration = $connection->getConfiguration();
+        $this->assertEquals([
+            'peer_name' => 'my_peer_name',
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+            'allow_self_signed' => true,
+            'capath' => '/etc/ssl/certs',
+            'cafile' => 'cert.pem',
+            'local_cert' => 'cert.crt',
+            'local_pk' => 'cert.key',
+            'passphrase' => 'password',
+            'verify_depth' => 1,
+            'ciphers' => 'my_ciphers',
+            'capture_peer_cert' => true,
+            'capture_peer_cert_chain' => true,
+            'SNI_enabled' => false,
+            'disable_compression' => true,
+            'peer_fingerprint' => ['hash_1', 'hash_2'],
+            'security_level' => 1,
+        ], $configuration['client']['ssl']);
+    }
+
     public function invalidTlsConfigDataProvider(): iterable
     {
         return [
