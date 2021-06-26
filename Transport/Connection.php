@@ -58,7 +58,34 @@ class Connection
             $configuration['client']['tcp_nodelay'] = filter_var($options['tcp_nodelay'], FILTER_VALIDATE_BOOLEAN);
         }
 
-        // TODO: TLS/SSL.
+        if (array_key_exists('tls', $options)) {
+            $configuration['client']['ssl'] = [];
+            // See https://www.php.net/manual/en/context.ssl.php
+            $allowed = [
+                'peer_name',
+                'verify_peer',
+                'verify_peer_name',
+                'allow_self_signed',
+                'cafile',
+                'capath',
+                'local_cert',
+                'local_pk',
+                'passphrase',
+                'verify_depth',
+                'ciphers',
+                'capture_peer_cert',
+                'capture_peer_cert_chain',
+                'SNI_enabled',
+                'disable_compression',
+                'peer_fingerprint',
+                'security_level',
+            ];
+            foreach ($allowed as $key) {
+                if (array_key_exists($key, $options['tls'])) {
+                    $configuration['client']['ssl'][$key] = $options['tls'][$key];
+                }
+            }
+        }
 
         // Build exchange configuration
         $configuration['exchange'] = [
@@ -363,7 +390,6 @@ class Connection
             unset($this->consumerTags[$queueName]);
         }
 
-        // TODO: Make sure we won't get prefetched messages from queues we've just unsubscribed from. How to check that?
         $client->run($this->waitTime);
 
         $buffer = $this->getBuffer();
