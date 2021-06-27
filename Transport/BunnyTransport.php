@@ -6,12 +6,13 @@ namespace Symfony\Component\Messenger\Bridge\Bunny\Transport;
 
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\Receiver\MessageCountAwareInterface;
+use Symfony\Component\Messenger\Transport\Receiver\QueueReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\PhpSerializer;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\SetupableTransportInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
-class BunnyTransport implements TransportInterface, SetupableTransportInterface, MessageCountAwareInterface
+class BunnyTransport implements TransportInterface, SetupableTransportInterface, MessageCountAwareInterface, QueueReceiverInterface
 {
     private $serializer;
     private $connection;
@@ -30,6 +31,14 @@ class BunnyTransport implements TransportInterface, SetupableTransportInterface,
     public function get(): iterable
     {
         return ($this->receiver ?? $this->getReceiver())->get();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFromQueues(array $queueNames): iterable
+    {
+        return ($this->receiver ?? $this->getReceiver())->getFromQueues($queueNames);
     }
 
     /**
